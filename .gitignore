@@ -1,0 +1,6 @@
+.cache
+.gitattributes
+.venv
+har_and_cookies
+*.srt
+run.sh
