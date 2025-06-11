@@ -32,5 +32,10 @@ python srt-ai-translator.py -h
 **Translation** _(Available languages: [ISO 639-2 Codes](https://www.loc.gov/standards/iso639-2/php/code_list.php))_:
 
 ```bash
-python srt-ai-translator.py input.srt eng ita
+python srt-ai-translator.py INPUT.srt eng ita
+python srt-ai-translator.py . eng ita
 ```
+
+## Screen
+
+![image](https://i.postimg.cc/VNx3gQmP/1.png)
