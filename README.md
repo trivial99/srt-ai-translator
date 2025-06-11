@@ -1,6 +1,6 @@
 # AI Subtitle Translator
 
-A multi-thread Python script to translate SubRip (.srt) subtitles using AI (g4f).
+A Python script to translate SubRip (.srt) subtitles using AI (g4f).
 
 ## Description
 
