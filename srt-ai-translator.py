@@ -37,15 +37,20 @@ def dict_to_srt(subtitles, output_file_path):
                 f.write(subtitle['translated'] + '\n\n')
     except Exception as e:
         print(f"{Fore.RED}ERR{Fore.RESET}: {e}")
+
 def translate_subtitle(client, subtitle, input_lang, output_lang, pbar, history):
     max_retries = 4
     retries = 0
     new_message = {
-        "role": "user", 
-        "content": f"Translate the following subtitle sentence from {input_lang} to {output_lang}.\
-        Translations must be adapted and grammatically correct according to {output_lang} language.\
-        Use correct genders considering characters names and overall context by referring to this chat history.\
-        Write only the translated sentence. This is the sentence: {subtitle['text']}"}
+        "role": "user",
+        "content": f"Considering all translated subtitles in the full chat history,\
+        translate the following subtitle sentence (at timing:{subtitle['time-start']}) from {input_lang} to {output_lang}:\
+        - Adapt the translated text to ensure fluency in {output_lang}.\
+        - Use the context of previous translations and character names to guess implicit genders (distant subtitle timing may lead to different scenes and characters).\
+        - Ensure the tone and register match the original context.\
+        - Adapt the translation to sound natural when spoken, avoiding overly literal or bookish phrasing.\
+        Write only the translation (e.g., don't say 'here is the translation', 'the translated version is' or similar phrases).\
+        Text:{subtitle['text']}"}
     
     # Append new message to history
     history.append(new_message)
@@ -62,45 +67,6 @@ def translate_subtitle(client, subtitle, input_lang, output_lang, pbar, history)
                 web_search=False
             )
             history.append({"role":"assistant","content":response.choices[0].message.content})
-            subtitle['translated'] = response.choices[0].message.content
-            pbar.update(1)
-            return
-        except Exception as e:
-            print(f"{Fore.RED}ERR{Fore.RESET}: sub {subtitle['id']} -> {e}, retry {retries + 1}/{max_retries + 1}")
-            print(f"Subtitle request: [{subtitle['text']}]")
-            retries += 1
-            if retries <= max_retries:
-                time.sleep(5)
-            else:
-                print(f"{Fore.RED}ERR{Fore.RESET}: The provider can't translate")
-                subtitle['translated'] = "! TRANSLATION ERROR !"
-                pbar.update(1)
-                return 
-
-def adapt_subtitle(client, subtitle, input_lang, output_lang, pbar, history):
-    max_retries = 4
-    retries = 0
-    new_message = {
-        "role": "user", 
-        "content": f"Considering all translated subtitles in the full chat history, for the following subtitle sentence.\
-        - Adapt the translated text to ensure fluency in {output_lang}.\
-        - If needed fix gender mismatches, using context from the full subtitle history and character names.\
-        - Correct inaccurate translations of short sentences that may have been split across multiple subtitles, considering the broader context.\
-        - Ensure the tone and register match the original context.\
-        - Adapt the translation to sound natural when spoken, avoiding overly literal or bookish phrasing.\
-        If it is already correct, directly rewrite the same sentence; otherwise directly write the corrected sentence.\
-        Original text:{subtitle['text']}\
-        Proposed translation text:{subtitle['translated']}."}
-
-    while retries <= max_retries:
-        try:
-            temp_history = history
-            temp_history.append(new_message)
-            response = client.chat.completions.create(
-                model="gpt-4o-mini",
-                messages=temp_history,
-                web_search=False
-            )
             subtitle['translated'] = response.choices[0].message.content
             pbar.update(1)
             return
@@ -198,20 +164,10 @@ def main():
         subtitles_list = srt_to_dict(input_file)
 
         # TRANSLATION
-        with tqdm(total=len(subtitles_list), desc=f"{Fore.YELLOW}Initial Translation (1/2){Fore.RESET}") as pbar:
+        with tqdm(total=len(subtitles_list), desc=f"{Fore.YELLOW}Translation{Fore.RESET}") as pbar:
             for subtitle in subtitles_list:
                 translate_subtitle(client, subtitle, input_lang, output_lang, pbar, history)
-        
-        with tqdm(total=len(subtitles_list), desc=f"{Fore.YELLOW}Final Adaptation (2/2){Fore.RESET}") as pbar:
-            for subtitle in subtitles_list:
-                # craft the updated history by stringifing subtitles
-                full_translated_text = ""
-                for subtitle_t in subtitles_list:
-                    full_translated_text += f"Text [{subtitle_t["id"]}]:{subtitle_t['text']}\nTranslated [{subtitle_t["id"]}]:{subtitle_t['translated']}\n\n"
-                history = [{"role":"assistant","content":full_translated_text}]
-                # adapt
-                adapt_subtitle(client, subtitle, input_lang, output_lang, pbar, history)
-        
+
         # FINAL SAVE
         dict_to_srt(subtitles_list, output_file)
 
