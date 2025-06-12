@@ -62,7 +62,7 @@ python srt-ai-translator.py INPUT.srt eng ita
 python srt-ai-translator.py . eng ita
 ```
 
-**Translate all subtitles auto-demuxing srt (stream index=0) in a folder**:
+**Translate all subtitles in a folder auto-demuxing srt (stream index=0)**:
 
 ```bash
 python srt-ai-translator.py . eng ita --demux 0
