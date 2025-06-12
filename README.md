@@ -52,8 +52,6 @@ options:
 
 **Translate a single subtitle**:
 
----
-
 ```bash
 python srt-ai-translator.py INPUT.srt eng ita
 ```
