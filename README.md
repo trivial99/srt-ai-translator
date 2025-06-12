@@ -21,19 +21,53 @@ source .venv/bin/activate
 pip install g4f\[all\] argparse pycountry tqdm colorama
 ```
 
+3. ffmpeg must be installed
+
 ## Usage
+
+_(Available languages: [ISO 639-2 Codes](https://www.loc.gov/standards/iso639-2/php/code_list.php))_
 
 **Help**:
 
-```bash
-python srt-ai-translator.py -h
+```
+$ python srt-ai-translator.py -h
+
+usage: srt-ai-translator.py [-h] [-o OUTPUT_FOLDER] [--demux [DEMUX]] [--delete]
+                            input_path input_lang output_lang
+
+translate SRT file(s) using gpt4free.
+
+positional arguments:
+  input_path            input path for the .srt file or folder containing .srt files
+  input_lang            input language (iso639): eng,fre,ita,jpn..
+  output_lang           output language (iso639): eng,fre,ita,jpn..
+
+options:
+  -h, --help            show this help message and exit
+  -o, --output_folder OUTPUT_FOLDER
+                        custom output folder for the .srt file(s)
+  --demux [DEMUX]       automatically demux .srt from file(s) (default stream index is 0)
+  --delete              delete the source .srt file after processing
 ```
 
-**Translation** _(Available languages: [ISO 639-2 Codes](https://www.loc.gov/standards/iso639-2/php/code_list.php))_:
+**Translate a single subtitle**:
+
+---
 
 ```bash
 python srt-ai-translator.py INPUT.srt eng ita
+```
+
+**Translate all subtitles in a folder**:
+
+```bash
 python srt-ai-translator.py . eng ita
+```
+
+**Translate all subtitles auto-demuxing srt (stream index=0) in a folder**:
+
+```bash
+python srt-ai-translator.py . eng ita --demux 0
 ```
 
 ## Screen
