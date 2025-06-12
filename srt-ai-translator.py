@@ -134,11 +134,12 @@ def main():
         for file in os.listdir(input_path):
             if file.endswith('.srt'):
                 srt_files.append(os.path.join(input_path, file))
-
+    srt_files.sort()
+    
     if not srt_files:
         print(f"{Fore.RED}ERR{Fore.RESET}: no .srt files found in the specified path.")
         return 1
-
+    
     client = Client(provider=Blackbox)
     history = []
 
